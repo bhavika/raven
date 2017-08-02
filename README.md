@@ -2,6 +2,14 @@
 
 A collection of scripts to manage your Spotify library.
 
+
+Run:
+
+1) Go [here](https://developer.spotify.com/web-api/console/post-playlists/) and enter your username,
+   select all the scopes necessary (user-follow-modify, user-playlist-modify, playlist-modify-public) then click Get OAuth Token
+2) `python commands.py follow -f /path/to/your/sample.csv`
+
+
 Features:
 
 - Follow all artists from a CSV file

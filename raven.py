@@ -1,29 +1,22 @@
-import spotipy
-import requests
 import csv
 import logging
-from spotipy.oauth2 import SpotifyClientCredentials
 import os
-import spotipy.util as util
-
+import spotipy
 
 class Raven(object):
 
     logging.basicConfig(filename='SpotifyManager.log', level=logging.DEBUG)
 
     def __init__(self):
-        # client_credentials = SpotifyClientCredentials(client_id=os.environ['SPOTIPY_CLIENT_ID'],
-        #                                                client_secret=os.environ['SPOTIPY_CLIENT_SECRET'])
-        self.scope = 'user-follow-modify'
-        self.username = os.environ['USERNAME']
-        self.token = util.prompt_for_user_token(self.username, self.scope, client_id=os.environ['SPOTIPY_CLIENT_ID'],
-                                                client_secret=os.environ['SPOTIPY_CLIENT_SECRET'])
-        self.spotify = spotipy.Spotify(auth=self.token)
-        self.prefix = 'https://api.spotify.com/v1/'
+        token = os.environ['TOKEN']
+        if token:
+            self.spotify = spotipy.Spotify(auth=token)
+            self.spotify.trace = True
+            self.spotify.prefix = 'https://api.spotify.com/v1/'
 
     def search_artist_ids(self, filepath):
         """
-         Find Spotify Artist IDs for all unique artists from a CSV file
+        Find Spotify Artist IDs for all unique artists from a CSV file
         :param filepath: String 
         """
         with open(filepath) as f:
