@@ -21,6 +21,7 @@ class Raven(object):
         """
         with open(filepath) as f:
             reader = csv.DictReader(f, fieldnames=['Artist', 'Song'], delimiter=',')
+            next(reader)
             artists = set()
             artist_ids = set()
             ignored = set()
@@ -28,6 +29,7 @@ class Raven(object):
                 artist = row['Artist'].strip()
                 artists.add(artist)
 
+            print(artists)
             logging.info("{} artists found!".format(len(artists)))
 
         for artist in artists:

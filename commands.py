@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from raven import Raven
-import requests
-
+from spotipy import Spotify
 
 def follow(filepath):
     r = Raven()
@@ -10,9 +9,9 @@ def follow(filepath):
     data = {}
     artist_ids = list(artist_ids)
     data['ids'] = [','.join(artist_ids)]
-    print (data)
     endpoint = 'me/following'
-    requests.request('PUT', r.spotify.prefix+endpoint, data=data)
+    # requests.request('PUT', r.spotify.prefix+endpoint, data=data)
+    s = Spotify()
 
 
 def get_parser():
