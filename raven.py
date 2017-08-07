@@ -2,6 +2,7 @@ import csv
 import logging
 import os
 import spotipy
+from time import sleep
 
 class Raven(object):
 
@@ -36,9 +37,11 @@ class Raven(object):
                 results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
                 id = str(results['artists']['items'][0]['id'])
                 artist_ids.add(id)
+                sleep(0.1)
             except IndexError:
                 ignored.add(artist)
                 logging.info("Ignored: ", artist)
+                sleep(0.4)
 
-        return artist_ids
+        return list(artist_ids)
 

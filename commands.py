@@ -14,13 +14,15 @@ def follow(filename):
     }
     artist_ids = r.search_artist_ids(filename)
     data = {}
-    data['ids'] = list(artist_ids)
     endpoint = 'me/following'
-    params = (
-        ('type', 'artist'),
-        ('ids', ','.join(data['ids']))
-    )
-    r = requests.put(r.spotify.prefix+endpoint, headers=headers, params=params)
 
-filename='/home/bhavika/Music/sample.csv'
+    for i in range(len(artist_ids)):
+        data['ids'] = artist_ids[i:i+49]
+        params = (
+            ('type', 'artist'),
+            ('ids', ','.join(data['ids']))
+        )
+        requests.put(r.spotify.prefix+endpoint, headers=headers, params=params)
+
+filename = 'Library.csv'
 follow(filename=filename)
