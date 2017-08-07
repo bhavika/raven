@@ -1,27 +1,26 @@
 #!/usr/bin/env python
 
 from raven import Raven
-from spotipy import Spotify
+import requests
+import os
 
-def follow(filepath):
+
+def follow(filename):
     r = Raven()
-    artist_ids = r.search_artist_ids(filepath)
+    token = os.getenv('TOKEN')
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+    }
+    artist_ids = r.search_artist_ids(filename)
     data = {}
-    artist_ids = list(artist_ids)
-    data['ids'] = [','.join(artist_ids)]
+    data['ids'] = list(artist_ids)
     endpoint = 'me/following'
-    # requests.request('PUT', r.spotify.prefix+endpoint, data=data)
-    s = Spotify()
+    params = (
+        ('type', 'artist'),
+        ('ids', ','.join(data['ids']))
+    )
+    r = requests.put(r.spotify.prefix+endpoint, headers=headers, params=params)
 
-
-def get_parser():
-    """Gets parser object for commands.py"""
-    import argparse
-    parser = argparse.ArgumentParser(description="Commands for Raven")
-    parser.add_argument("-f", "--file", dest="filepath", type=lambda x: follow(x),
-                        help="Specify source CSV filepath")
-    return parser
-
-
-if __name__ == '__main__':
-    args = get_parser().parse_args()
+filename='/home/bhavika/Music/sample.csv'
+follow(filename=filename)

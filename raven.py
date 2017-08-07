@@ -29,7 +29,6 @@ class Raven(object):
                 artist = row['Artist'].strip()
                 artists.add(artist)
 
-            print(artists)
             logging.info("{} artists found!".format(len(artists)))
 
         for artist in artists:
