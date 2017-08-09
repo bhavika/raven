@@ -7,6 +7,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
+
 class Raven(object):
 
     logging.basicConfig(filename='Raven.log', level=logging.DEBUG)
@@ -38,8 +39,8 @@ class Raven(object):
         for artist in artists:
             try:
                 results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
-                id = str(results['artists']['items'][0]['id'])
-                artist_ids.add(id)
+                a_id = str(results['artists']['items'][0]['id'])
+                artist_ids.add(a_id)
                 sleep(0.1)
             except IndexError:
                 ignored.add(artist)
