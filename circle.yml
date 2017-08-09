@@ -1,0 +1,12 @@
+machine:
+    python:
+        version: 3.4.3
+
+dependencies:
+    post:
+        - pip install -U -r requirements.txt
+
+test:
+    override:
+        - pytest
+        - flake8 . --max-line-length=120 max-complexity=10

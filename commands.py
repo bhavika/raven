@@ -24,5 +24,5 @@ def follow(filename):
         )
         requests.put(r.spotify.prefix+endpoint, headers=headers, params=params)
 
-filename = 'Library.csv'
-follow(filename=filename)
+path = 'Library.csv'
+follow(filename=path)
