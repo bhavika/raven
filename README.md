@@ -1,7 +1,8 @@
-**Spotify Manager**
+**Raven**
 
-A collection of scripts to manage your Spotify library.
+CLI tools to manage your Spotify library. 
 
+[![CircleCI](https://circleci.com/gh/bhavika/raven/tree/master.svg?style=svg)](https://circleci.com/gh/bhavika/raven/tree/master)
 
 Run:
 
