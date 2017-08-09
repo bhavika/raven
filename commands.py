@@ -3,15 +3,11 @@
 from raven import Raven
 import requests
 import os
+import fire
 
 
 def follow(filename):
     r = Raven()
-    token = os.getenv('TOKEN')
-    headers = {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + token
-    }
     artist_ids = r.search_artist_ids(filename)
     data = {}
     endpoint = 'me/following'
@@ -22,7 +18,22 @@ def follow(filename):
             ('type', 'artist'),
             ('ids', ','.join(data['ids']))
         )
-        requests.put(r.spotify.prefix+endpoint, headers=headers, params=params)
+        requests.put(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
 
-path = 'Library.csv'
-follow(filename=path)
+        
+def add_songs(location, filename):
+    r = Raven()
+    track_ids = r.search_song_ids(filepath=filename)
+    if location == 'playlist':
+        playlist_title = input("Enter a name for your playlist")
+        public = input("Make this playlist public? (yes/no)").lower()
+        if public.startswith('y'):
+            public = 'true'
+        data = dict(name=playlist_title, public=False, description="Created automatically by Raven from {}".
+                    format(filename))
+        # Submit a playlist creation request, read response & get playlist ID
+        endpoint = 'users/{user_id}/playlists/{playlist_id}/tracks'.format(user_id=os.getenv('USERNAME'))
+
+
+if __name__ == '__main__':
+    fire.Fire()
