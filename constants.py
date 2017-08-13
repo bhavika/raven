@@ -4,4 +4,4 @@ scope = 'playlist-modify-public user-follow-modify user-library-modify playlist-
 follow_endpoint = 'me/following'
 playlist_add_endpoint = 'users/{user_id}/playlists/{playlist_id}/tracks'
 TRACK_URI_FORMAT = 'spotify:track:'
-library_add_endpoint = 'me/tracks'
+

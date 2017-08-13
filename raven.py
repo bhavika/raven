@@ -63,7 +63,7 @@ class Raven(object):
         """
         tracks = create_collection(filepath, item_type='tracks')
 
-        print ("{} tracks found".format(len(tracks)))
+        print("{} tracks found".format(len(tracks)))
 
         track_ids = set()
         ignored = set()

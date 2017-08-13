@@ -4,7 +4,7 @@ from raven import Raven
 import requests
 import os
 import fire
-from constants import follow_endpoint, playlist_add_endpoint, TRACK_URI_FORMAT, library_add_endpoint
+from constants import follow_endpoint, playlist_add_endpoint, TRACK_URI_FORMAT
 
 
 def follow(filename):
@@ -56,7 +56,6 @@ def add_songs(location, filename):
                     ('uris', ','.join(x))
                 )
 
-        print(params)
         requests.put(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
 
     elif location == 'library':
@@ -66,9 +65,8 @@ def add_songs(location, filename):
         else:
             for i in range(size):
                 x = track_ids[i:i+49]
-                results = r.spotify.current_user_saved_tracks_add(tracks=x)
+                r.spotify.current_user_saved_tracks_add(tracks=x)
 
-        print(results)
 
 if __name__ == '__main__':
     fire.Fire()
