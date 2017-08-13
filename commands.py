@@ -20,7 +20,7 @@ def follow(filename):
         )
         requests.put(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
-        
+
 def add_songs(location, filename):
     r = Raven()
     track_ids = r.search_song_ids(filepath=filename)
