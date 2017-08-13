@@ -4,13 +4,13 @@ from raven import Raven
 import requests
 import os
 import fire
+from constants import follow_endpoint, playlist_add_endpoint, TRACK_URI_FORMAT
 
 
 def follow(filename):
     r = Raven()
     artist_ids = r.search_artist_ids(filename)
     data = {}
-    endpoint = 'me/following'
 
     for i in range(len(artist_ids)):
         data['ids'] = artist_ids[i:i+49]
@@ -18,21 +18,47 @@ def follow(filename):
             ('type', 'artist'),
             ('ids', ','.join(data['ids']))
         )
-        requests.put(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
+        requests.put(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
         
 def add_songs(location, filename):
     r = Raven()
     track_ids = r.search_song_ids(filepath=filename)
+    track_uris = [TRACK_URI_FORMAT+track_id for track_id in track_ids]
+
+    username = os.environ['USERNAME']
+
     if location == 'playlist':
-        playlist_title = input("Enter a name for your playlist")
-        public = input("Make this playlist public? (yes/no)").lower()
+        playlist_title = input("Enter a name for your playlist ")
+
+        public = input("Make this playlist public? (yes/no) ").lower()
         if public.startswith('y'):
             public = 'true'
-        data = dict(name=playlist_title, public=False, description="Created automatically by Raven from {}".
-                    format(filename))
-        # Submit a playlist creation request, read response & get playlist ID
-        endpoint = 'users/{user_id}/playlists/{playlist_id}/tracks'.format(user_id=os.getenv('USERNAME'))
+        else:
+            public = 'false'
+        new_playlist = r.spotify.user_playlist_create(user=username, name=playlist_title, public=public)
+        playlist_id = new_playlist["id"]
+
+        endpoint = playlist_add_endpoint.format(user_id=username, playlist_id=playlist_id)
+
+        size = len(track_uris)
+
+        # Rate limiting - push 50 items per request
+        if size < 49:
+            params = (
+                ('position', 0),
+                ('uris', ','.join(track_uris))
+            )
+        else:
+            for i in range(size):
+                x = track_uris[i:i + 49]
+                params = (
+                    ('position', 0),
+                    ('uris', ','.join(x))
+                )
+
+        print(params)
+        requests.put(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
 
 
 if __name__ == '__main__':

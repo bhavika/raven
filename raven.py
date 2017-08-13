@@ -2,10 +2,12 @@ import csv
 import logging
 import os
 import spotipy
+from spotipy import util
 from time import sleep
+from constants import scope
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv())
 
+load_dotenv(find_dotenv())
 
 
 class Raven(object):
@@ -13,7 +15,10 @@ class Raven(object):
     logging.basicConfig(filename='Raven.log', level=logging.DEBUG)
 
     def __init__(self):
-        token = os.environ['TOKEN']
+        token = util.prompt_for_user_token(os.environ['USERNAME'], scope=scope,
+                                           client_id=os.getenv('SPOTIPY_CLIENT_ID'),
+                                           client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
+                                           redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'))
         if token:
             self.spotify = spotipy.Spotify(auth=token)
             self.spotify.trace = True
@@ -39,23 +44,23 @@ class Raven(object):
         for artist in artists:
             try:
                 results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
-                a_id = str(results['artists']['items'][0]['id'])
-                artist_ids.add(a_id)
+                aid = str(results['artists']['items'][0]['id'])
+                artist_ids.add(aid)
+                logging.info("Added artist ID for: ", str(artist))
                 sleep(0.1)
             except IndexError:
                 ignored.add(artist)
-                logging.info("Ignored: ", artist)
+                logging.info("Ignored: ", str(artist))
                 sleep(0.4)
 
         return list(artist_ids)
 
     def search_song_ids(self, filepath):
         """
-        Find Spotify song ID for all the tracks from a CSV file
+        Find Spotify track ID for all the tracks from a CSV file
         :param filepath: str
-        :return: list of song IDs
+        :return: list of track IDs
         """
-
         tracks = create_collection(filepath, item_type='tracks')
         track_ids = set()
         ignored = set()
@@ -63,12 +68,12 @@ class Raven(object):
         for track in tracks:
             try:
                 results = self.spotify.search(q=track, type='track', limit=3)
-                id = str(results['tracks']['items'][0]['id'])
-                track_ids.add(id)
+                tid = str(results['tracks']['items'][0]['id'])
+                track_ids.add(tid)
                 sleep(0.1)
             except IndexError:
                 ignored.add(track)
-                logging.info("Ignored: ", track)
+                logging.info("Ignored: ", str(track))
                 sleep(0.4)
 
         return list(track_ids)
@@ -82,8 +87,8 @@ def create_collection(filepath, item_type='artists'):
         for row in reader:
             artist = row['Artist'].strip()
             if item_type == 'Song':
-                song = row['Song'].strip()
-                items.add(song + " " + artist)
+                track = row['Song'].strip()
+                items.add(track + " " + artist)
             else:
                 items.add(artist)
     return items
