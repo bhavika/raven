@@ -62,6 +62,9 @@ class Raven(object):
         :return: list of track IDs
         """
         tracks = create_collection(filepath, item_type='tracks')
+
+        print("{} tracks found".format(len(tracks)))
+
         track_ids = set()
         ignored = set()
 
@@ -79,14 +82,14 @@ class Raven(object):
         return list(track_ids)
 
 
-def create_collection(filepath, item_type='artists'):
+def create_collection(filepath, item_type):
     with open(filepath) as f:
         reader = csv.DictReader(f, fieldnames=['Artist', 'Song'], delimiter=',')
         next(reader)
         items = set()
         for row in reader:
             artist = row['Artist'].strip()
-            if item_type == 'Song':
+            if item_type == 'tracks':
                 track = row['Song'].strip()
                 items.add(track + " " + artist)
             else:

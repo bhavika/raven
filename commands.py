@@ -24,11 +24,12 @@ def follow(filename):
 def add_songs(location, filename):
     r = Raven()
     track_ids = r.search_song_ids(filepath=filename)
-    track_uris = [TRACK_URI_FORMAT+track_id for track_id in track_ids]
-
     username = os.environ['USERNAME']
+    size = len(track_ids)
 
     if location == 'playlist':
+        track_uris = [TRACK_URI_FORMAT + track_id for track_id in track_ids]
+
         playlist_title = input("Enter a name for your playlist ")
 
         public = input("Make this playlist public? (yes/no) ").lower()
@@ -40,8 +41,6 @@ def add_songs(location, filename):
         playlist_id = new_playlist["id"]
 
         endpoint = playlist_add_endpoint.format(user_id=username, playlist_id=playlist_id)
-
-        size = len(track_uris)
 
         # Rate limiting - push 50 items per request
         if size < 49:
@@ -57,8 +56,16 @@ def add_songs(location, filename):
                     ('uris', ','.join(x))
                 )
 
-        print(params)
         requests.put(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
+
+    elif location == 'library':
+
+        if size < 49:
+            r.spotify.current_user_saved_tracks_add(tracks=track_ids)
+        else:
+            for i in range(size):
+                x = track_ids[i:i+49]
+                r.spotify.current_user_saved_tracks_add(tracks=x)
 
 
 if __name__ == '__main__':
