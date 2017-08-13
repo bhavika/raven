@@ -61,7 +61,7 @@ def add_songs(location, filename):
     elif location == 'library':
 
         if size < 49:
-            results = r.spotify.current_user_saved_tracks_add(tracks=track_ids)
+            r.spotify.current_user_saved_tracks_add(tracks=track_ids)
         else:
             for i in range(size):
                 x = track_ids[i:i+49]
