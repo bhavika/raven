@@ -10,6 +10,7 @@ CLI tools to manage your Spotify library.
 - python-dotenv
 - fire
 - requests
+- tqdm 
 
 ### Installation:
 
