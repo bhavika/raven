@@ -95,7 +95,7 @@ def create_collection(filepath, item_type):
         for row in tqdm(reader):
             artist = row['Artist'].strip()
             if item_type == 'tracks':
-                track = row['Song'].strip()
+                track = row['Track'].strip()
                 items.add(track + " " + artist)
             else:
                 items.add(artist)
