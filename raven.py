@@ -5,6 +5,7 @@ import spotipy
 from spotipy import util
 from time import sleep
 from constants import scope
+from tqdm import tqdm
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -12,7 +13,7 @@ load_dotenv(find_dotenv())
 
 class Raven(object):
 
-    logging.basicConfig(filename='Raven.log', level=logging.DEBUG)
+    logging.basicConfig(filename='Raven.log', filemode='a', level=logging.DEBUG)
 
     def __init__(self):
         token = util.prompt_for_user_token(os.environ['USERNAME'], scope=scope,
@@ -38,19 +39,22 @@ class Raven(object):
         """
 
         artists = create_collection(filepath, item_type='artists')
+
+        print("{} artists found".format(len(artists)))
+
         artist_ids = set()
         ignored = set()
 
-        for artist in artists:
+        for artist in tqdm(artists):
             try:
                 results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
                 aid = str(results['artists']['items'][0]['id'])
                 artist_ids.add(aid)
-                logging.info("Added artist ID for: ", str(artist))
+                logging.info("Added artist ID for: {} ".format(artist))
                 sleep(0.1)
             except IndexError:
                 ignored.add(artist)
-                logging.info("Ignored: ", str(artist))
+                logging.debug("Ignored: {}".format(artist))
                 sleep(0.4)
 
         return list(artist_ids)
@@ -68,15 +72,16 @@ class Raven(object):
         track_ids = set()
         ignored = set()
 
-        for track in tracks:
+        for track in tqdm(tracks):
             try:
                 results = self.spotify.search(q=track, type='track', limit=3)
                 tid = str(results['tracks']['items'][0]['id'])
                 track_ids.add(tid)
+                logging.info("Added track ID for: {} ".format(track))
                 sleep(0.1)
             except IndexError:
                 ignored.add(track)
-                logging.info("Ignored: ", str(track))
+                logging.debug("Ignored: {}".format(track))
                 sleep(0.4)
 
         return list(track_ids)
@@ -87,7 +92,7 @@ def create_collection(filepath, item_type):
         reader = csv.DictReader(f, fieldnames=['Artist', 'Song'], delimiter=',')
         next(reader)
         items = set()
-        for row in reader:
+        for row in tqdm(reader):
             artist = row['Artist'].strip()
             if item_type == 'tracks':
                 track = row['Song'].strip()
