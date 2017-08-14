@@ -4,6 +4,7 @@ from raven import Raven
 import requests
 import os
 import fire
+from tqdm import tqdm
 from constants import follow_endpoint, playlist_add_endpoint, TRACK_URI_FORMAT
 
 
@@ -12,7 +13,7 @@ def follow(filename):
     artist_ids = r.search_artist_ids(filename)
     data = {}
 
-    for i in range(len(artist_ids)):
+    for i in tqdm(range(len(artist_ids))):
         data['ids'] = artist_ids[i:i+49]
         params = (
             ('type', 'artist'),
@@ -49,7 +50,7 @@ def add_songs(location, filename):
                 ('uris', ','.join(track_uris))
             )
         else:
-            for i in range(size):
+            for i in tqdm(range(size)):
                 x = track_uris[i:i + 49]
                 params = (
                     ('position', 0),
@@ -63,9 +64,23 @@ def add_songs(location, filename):
         if size < 49:
             r.spotify.current_user_saved_tracks_add(tracks=track_ids)
         else:
-            for i in range(size):
+            for i in tqdm(range(size)):
                 x = track_ids[i:i+49]
                 r.spotify.current_user_saved_tracks_add(tracks=x)
+
+
+def unfollow(filename):
+    r = Raven()
+    artist_ids = r.search_artist_ids(filename)
+    data = {}
+
+    for i in tqdm(range(len(artist_ids))):
+        data['ids'] = artist_ids[i:i+49]
+        params = (
+            ('type', 'artist'),
+            ('ids', ','.join(data['ids']))
+        )
+        requests.delete(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
 
 if __name__ == '__main__':

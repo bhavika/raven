@@ -23,11 +23,6 @@ CLI tools to manage your Spotify library.
 
 ### Features:
 
-- Follow all artists from a CSV file
-
-
-### To Do:
-
-- Add a list of songs (CSV/XSPF) to a new playlist or library.
-- Unfollow artists from a CSV file. 
-
+- Follow all artists from a CSV file.
+- Unfollow all artists from a CSV file.
+- Add a list of songs (CSV) to a new playlist or library.
