@@ -69,5 +69,19 @@ def add_songs(location, filename):
                 r.spotify.current_user_saved_tracks_add(tracks=x)
 
 
+def unfollow(filename):
+    r = Raven()
+    artist_ids = r.search_artist_ids(filename)
+    data = {}
+
+    for i in tqdm(range(len(artist_ids))):
+        data['ids'] = artist_ids[i:i+49]
+        params = (
+            ('type', 'artist'),
+            ('ids', ','.join(data['ids']))
+        )
+        requests.delete(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
+
+
 if __name__ == '__main__':
     fire.Fire()
