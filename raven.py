@@ -89,7 +89,7 @@ class Raven(object):
 
 def create_collection(filepath, item_type):
     with open(filepath) as f:
-        reader = csv.DictReader(f, fieldnames=['Artist', 'Song'], delimiter=',')
+        reader = csv.DictReader(f, fieldnames=['Artist', 'Track'], delimiter=',')
         next(reader)
         items = set()
         for row in tqdm(reader):
