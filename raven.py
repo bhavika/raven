@@ -3,10 +3,12 @@ import logging
 import os
 import spotipy
 from spotipy import util
+from spotipy import oauth2
 from time import sleep
 from constants import scope
 from tqdm import tqdm
 from dotenv import load_dotenv, find_dotenv
+import json
 
 load_dotenv(find_dotenv())
 
@@ -31,6 +33,22 @@ class Raven(object):
         else:
             print("Token not set in environment.")
 
+    def refresh_token(self):
+        sp_oauth = oauth2.SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID'),
+                                       client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
+                                       redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'),
+                                       scope=scope)
+
+        filename = '.cache-'+os.environ['USERNAME']
+        with open(filename) as f:
+            token = json.load(f)
+
+            if sp_oauth._is_token_expired(token):
+                refresh_token = token['refresh_token']
+                token = sp_oauth.refresh_access_token(refresh_token)
+
+        return spotipy.Spotify(auth=token['access_token'])
+
     def search_artist_ids(self, filepath):
         """
         Find Spotify Artist IDs for all unique artists from a CSV file
@@ -46,16 +64,20 @@ class Raven(object):
         ignored = set()
 
         for artist in tqdm(artists):
-            try:
-                results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
-                aid = str(results['artists']['items'][0]['id'])
-                artist_ids.add(aid)
-                logging.info("Added artist ID for: {} ".format(artist))
-                sleep(0.1)
-            except IndexError:
-                ignored.add(artist)
-                logging.debug("Ignored: {}".format(artist))
-                sleep(0.4)
+            while True:
+                try:
+                    results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
+                    aid = str(results['artists']['items'][0]['id'])
+                    artist_ids.add(aid)
+                    logging.info("Added artist ID for: {} ".format(artist))
+                    sleep(0.1)
+                except IndexError:
+                    ignored.add(artist)
+                    logging.debug("Ignored: {}".format(artist))
+                    sleep(0.4)
+                except ConnectionError:
+                    continue
+                break
 
         return list(artist_ids)
 
@@ -73,6 +95,7 @@ class Raven(object):
         ignored = set()
 
         for track in tqdm(tracks):
+
             try:
                 results = self.spotify.search(q=track, type='track', limit=3)
                 tid = str(results['tracks']['items'][0]['id'])
@@ -100,3 +123,7 @@ def create_collection(filepath, item_type):
             else:
                 items.add(artist)
     return items
+
+
+r = Raven()
+r.refresh_token()
