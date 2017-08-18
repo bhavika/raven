@@ -3,6 +3,7 @@ import logging
 import os
 import spotipy
 from spotipy import util
+from spotipy.client import SpotifyException
 from spotipy import oauth2
 from time import sleep
 from constants import scope
@@ -81,6 +82,9 @@ class Raven(object):
                     sleep(0.4)
                 except ConnectionError:
                     continue
+                except SpotifyException as e:
+                    logging.debug(e.__str__())
+                    # Refresh token here
                 break
 
         return list(artist_ids)
