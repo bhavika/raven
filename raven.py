@@ -34,6 +34,10 @@ class Raven(object):
             print("Token not set in environment.")
 
     def refresh_token(self):
+
+        # TODO: Check whether refresh is needed
+        # if 'expiration_time' not in token or token['expiration_time'] - now == timedelta(minutes=0):
+
         sp_oauth = oauth2.SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID'),
                                        client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
                                        redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'),
