@@ -40,7 +40,7 @@ class Raven(object):
             token = json.load(f)
 
         if 'expires_at' not in token or \
-                                token['expires_at'] - int(datetime.now().strftime("%s")) == timedelta(minutes=0):
+                timedelta(minutes=0) == token['expires_at'] - int(datetime.now().strftime("%s")):
 
             sp_oauth = oauth2.SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID'),
                                            client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
