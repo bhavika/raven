@@ -6,6 +6,7 @@ from spotipy import util
 from spotipy.client import SpotifyException
 from spotipy import oauth2
 from time import sleep
+from datetime import timedelta, datetime
 from constants import scope
 from tqdm import tqdm
 from dotenv import load_dotenv, find_dotenv
@@ -15,7 +16,6 @@ load_dotenv(find_dotenv())
 
 
 class Raven(object):
-
     logging.basicConfig(filename='Raven.log', filemode='a', level=logging.DEBUG)
 
     def __init__(self):
@@ -35,18 +35,17 @@ class Raven(object):
             print("Token not set in environment.")
 
     def refresh_token(self):
-
-        # TODO: Check whether refresh is needed
-        # if 'expiration_time' not in token or token['expiration_time'] - now == timedelta(minutes=0):
-
-        sp_oauth = oauth2.SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID'),
-                                       client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
-                                       redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'),
-                                       scope=scope)
-
-        filename = '.cache-'+os.environ['USERNAME']
+        filename = '.cache-' + os.environ['USERNAME']
         with open(filename) as f:
             token = json.load(f)
+
+        if 'expires_at' not in token or \
+                                token['expires_at'] - int(datetime.now().strftime("%s")) == timedelta(minutes=0):
+
+            sp_oauth = oauth2.SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID'),
+                                           client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
+                                           redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'),
+                                           scope=scope)
 
             if sp_oauth._is_token_expired(token):
                 refresh_token = token['refresh_token']
@@ -71,21 +70,22 @@ class Raven(object):
         for artist in tqdm(artists):
             while True:
                 try:
-                    results = self.spotify.search(q='artist:'+artist, type='artist', limit=3)
+                    results = self.spotify.search(q='artist:' + artist, type='artist', limit=3)
                     aid = str(results['artists']['items'][0]['id'])
                     artist_ids.add(aid)
+                    r.refresh_token()
                     logging.info("Added artist ID for: {} ".format(artist))
-                    sleep(0.1)
                 except IndexError:
                     ignored.add(artist)
                     logging.debug("Ignored: {}".format(artist))
+                    r.refresh_token()
                     sleep(0.4)
                 except ConnectionError:
                     continue
                 except SpotifyException as e:
+                    r.refresh_token()
                     logging.debug(e.__str__())
-                    # Refresh token here
-                break
+            break
 
         return list(artist_ids)
 
@@ -103,17 +103,19 @@ class Raven(object):
         ignored = set()
 
         for track in tqdm(tracks):
-
             try:
                 results = self.spotify.search(q=track, type='track', limit=3)
                 tid = str(results['tracks']['items'][0]['id'])
                 track_ids.add(tid)
                 logging.info("Added track ID for: {} ".format(track))
-                sleep(0.1)
             except IndexError:
                 ignored.add(track)
                 logging.debug("Ignored: {}".format(track))
-                sleep(0.4)
+            except ConnectionError:
+                continue
+            except SpotifyException as e:
+                r.refresh_token()
+                logging.debug(e.__str__())
 
         return list(track_ids)
 
