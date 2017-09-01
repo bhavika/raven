@@ -3,8 +3,11 @@
 import os
 import requests
 from tqdm import tqdm
+import logging
 from raven.constants import *
 from raven.raven import Raven
+
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 def follow(filename):
@@ -12,18 +15,36 @@ def follow(filename):
     artist_ids = r.search_artist_ids(filename)
     data = {}
 
-    for i in tqdm(range(len(artist_ids))):
-        data['ids'] = artist_ids[i:i+49]
+    size = len(artist_ids)
+
+    if size < 49:
+        data['ids'] = artist_ids
         params = (
             ('type', 'artist'),
             ('ids', ','.join(data['ids']))
         )
         requests.put(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
+    else:
+        x = [artist_ids[i: i+49] for i in range(0, len(artist_ids), 49)]
+        for chunk in x:
+            data['ids'] = chunk
+            params = (
+                ('type', 'artist'),
+                ('ids', ','.join(data['ids']))
+            )
+            requests.put(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
-def add_tracks(location, filename):
+
+def add_tracks(location, filename, source='cache'):
     r = Raven()
-    track_ids = r.search_song_ids(filepath=filename)
+
+    if source == 'cache':
+        track_ids = [line.rstrip('\n') for line in open('.cache-tracks.txt', 'r')]
+
+    else:
+        track_ids = r.search_song_ids(filepath=filename)
+
     username = os.environ['USERNAME']
     size = len(track_ids)
 
@@ -48,15 +69,15 @@ def add_tracks(location, filename):
                 ('position', 0),
                 ('uris', ','.join(track_uris))
             )
+            requests.put(url=r.spotify.prefix + endpoint, headers=r.headers, params=params)
         else:
-            for i in tqdm(range(size)):
-                x = track_uris[i:i + 49]
+            x = [track_uris[i: i+49] for i in range(0, size, 49)]
+            for chunk in tqdm(x):
                 params = (
                     ('position', 0),
-                    ('uris', ','.join(x))
+                    ('uris', ','.join(chunk))
                 )
-
-        requests.put(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
+                requests.post(url=r.spotify.prefix+endpoint, headers=r.headers, params=params)
 
     elif location == 'library':
 

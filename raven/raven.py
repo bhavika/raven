@@ -15,6 +15,8 @@ from raven.constants import scope
 
 load_dotenv(find_dotenv())
 
+logging.getLogger("requests").setLevel(logging.WARNING)
+
 
 class Raven(object):
 
@@ -118,7 +120,7 @@ class Raven(object):
                 r.refresh_token()
                 logging.debug(e.__str__())
 
-        with open('.cache-%s-tracks.txt'.format(os.environ['USERNAME']), 'w') as track_cache:
+        with open('.cache-{0}-tracks.txt'.format(os.environ['USERNAME']), 'w') as track_cache:
             for track in track_ids:
                 track_cache.write(track + '\n')
 
