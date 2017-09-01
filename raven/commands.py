@@ -36,10 +36,10 @@ def follow(filename):
             requests.put(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
 
-def add_tracks(location, filename, source='library'):
+def add_tracks(location, filename=None, source='library'):
     r = Raven()
 
-    if source == 'cache':
+    if str(source) == 'cache':
         track_ids = [line.rstrip('\n') for line in open('.cache-{0}-tracks.txt'.format(os.environ['USERNAME']), 'r')]
 
     else:
@@ -98,10 +98,22 @@ def unfollow(filename):
     artist_ids = r.search_artist_ids(filename)
     data = {}
 
-    for i in tqdm(range(len(artist_ids))):
-        data['ids'] = artist_ids[i:i+49]
+    size = len(artist_ids)
+
+    if size < 49:
+        data['ids'] = artist_ids
         params = (
             ('type', 'artist'),
             ('ids', ','.join(data['ids']))
         )
-        requests.delete(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
+        requests.delete(url=r.spotify.prefix + follow_endpoint, headers=r.headers, params=params)
+
+    else:
+        x = [artist_ids[i: i + 49] for i in range(0, size, 49)]
+        for chunk in tqdm(x):
+            data['ids'] = chunk
+            params = (
+                ('type', 'artist'),
+                ('ids', ','.join(data['ids']))
+            )
+            requests.delete(url=r.spotify.prefix + follow_endpoint, headers=r.headers, params=params)

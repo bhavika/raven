@@ -50,16 +50,34 @@ localhost?code=<TOKEN>) and paste it into the terminal where you ran the raven c
 
 Every time the access token expires, you'll be required to reauthenticate Raven with Spotify. 
 
-1) Open a terminal in the `raven` directory. 
-2) To follow all artists from a CSV file (look at format.csv), run
-   `python commands.py follow '/path/to/your/CSV/file'`
-3) To unfollow all artists from a CSV file (look at format.csv), run
-   `python commands.py unfollow '/path/to/your/csv/file'`
-4) To add a bunch of songs to a playlist from a CSV file (look at format.csv), run
-   `python commands.py add-tracks playlist '/path/to/your/csv/file'`
-5) To add a bunch of songs to your library from a CSV file (look at format.csv), run
-   `python commands.py add-tracks library '/path/to/your/csv/file'`
+##### Open a terminal in the `raven` directory and try the following.
+
+Follow all artists from a CSV file (look at format.csv)
+
+    python main.py follow '/path/to/your/CSV/file'
+
+Unfollow all artists from a CSV file (look at format.csv)
+
+    python main.py unfollow '/path/to/your/csv/file'
+
+Add a bunch of songs to a playlist from a CSV file (look at format.csv)
+
+    python main.py add-tracks playlist '/path/to/your/csv/file'
+
+Add a bunch of songs to a playlist from cached search results (track_ids)
+
+[Note: When you're specifying source as cache, the filename argument is not needed.]
+
+    python main.py add-tracks playlist --source=cache
+
+Add a bunch of songs to your library from a CSV file (look at format.csv)
+
+    python main.py add-tracks library '/path/to/your/csv/file'
    
+Add a bunch of songs to to your library from the cached search results (track_ids)
+    
+    python main.py add-tracks library --source=cache
+
 ### Features:
 
 - Follow all artists from a CSV file.
