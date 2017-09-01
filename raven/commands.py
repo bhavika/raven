@@ -36,14 +36,18 @@ def follow(filename):
             requests.put(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
 
 
-def add_tracks(location, filename, source='cache'):
+def add_tracks(location, filename, source='library'):
     r = Raven()
 
     if source == 'cache':
         track_ids = [line.rstrip('\n') for line in open('.cache-{0}-tracks.txt'.format(os.environ['USERNAME']), 'r')]
 
     else:
-        track_ids = r.search_song_ids(filepath=filename)
+        if os.path.isfile(filename):
+            track_ids = r.search_song_ids(filepath=filename)
+        else:
+            print("Invalid file path entered. Try again.")
+            exit()
 
     username = os.environ['USERNAME']
     size = len(track_ids)
