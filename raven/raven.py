@@ -139,4 +139,5 @@ def create_collection(filepath, item_type):
                 items.add(artist)
     return items
 
+
 r = Raven()

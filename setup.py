@@ -5,6 +5,7 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
+
 setup(name='raven',
       version='0.1',
       description='CLI tools to manage your Spotify music library.',
