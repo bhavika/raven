@@ -1,21 +1,23 @@
 import csv
+import json
 import logging
 import os
+from datetime import timedelta, datetime
+from time import sleep
+
 import spotipy
+from dotenv import load_dotenv, find_dotenv
+from spotipy import oauth2
 from spotipy import util
 from spotipy.client import SpotifyException
-from spotipy import oauth2
-from time import sleep
-from datetime import timedelta, datetime
-from constants import scope
 from tqdm import tqdm
-from dotenv import load_dotenv, find_dotenv
-import json
+from raven.constants import scope
 
 load_dotenv(find_dotenv())
 
 
 class Raven(object):
+
     logging.basicConfig(filename='Raven.log', filemode='a', level=logging.DEBUG)
 
     def __init__(self):
@@ -85,7 +87,6 @@ class Raven(object):
                 except SpotifyException as e:
                     r.refresh_token()
                     logging.debug(e.__str__())
-            break
 
         return list(artist_ids)
 

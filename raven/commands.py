@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-from raven import Raven
-import requests
 import os
-import fire
+import requests
 from tqdm import tqdm
-from constants import follow_endpoint, playlist_add_endpoint, TRACK_URI_FORMAT
+from raven.constants import *
+from raven.raven import Raven
 
 
 def follow(filename):
@@ -81,7 +80,3 @@ def unfollow(filename):
             ('ids', ','.join(data['ids']))
         )
         requests.delete(url=r.spotify.prefix+follow_endpoint, headers=r.headers, params=params)
-
-
-if __name__ == '__main__':
-    fire.Fire()
