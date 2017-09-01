@@ -4,3 +4,4 @@ scope = 'playlist-modify-public user-follow-modify user-library-modify playlist-
 follow_endpoint = 'me/following'
 playlist_add_endpoint = 'users/{user_id}/playlists/{playlist_id}/tracks'
 TRACK_URI_FORMAT = 'spotify:track:'
+DESCRIPTION = "This playlist was created automagically by Raven https://github.com/bhavika/raven"
