@@ -117,6 +117,10 @@ class Raven(object):
                 r.refresh_token()
                 logging.debug(e.__str__())
 
+        with open('.cache-%s-tracks.txt'.format(os.environ['USERNAME']), 'w') as track_cache:
+            for track in track_ids:
+                track_cache.write(track + '\n')
+
         return list(track_ids)
 
 
@@ -134,6 +138,4 @@ def create_collection(filepath, item_type):
                 items.add(artist)
     return items
 
-
 r = Raven()
-r.refresh_token()
