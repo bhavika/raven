@@ -2,4 +2,4 @@
 max-line-length = 120
 max-complexity = 10
 
-ignore = F405
+ignore = F405,F403,E226
