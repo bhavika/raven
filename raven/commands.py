@@ -40,7 +40,7 @@ def add_tracks(location, filename, source='cache'):
     r = Raven()
 
     if source == 'cache':
-        track_ids = [line.rstrip('\n') for line in open('.cache-tracks.txt', 'r')]
+        track_ids = [line.rstrip('\n') for line in open('.cache-{0}-tracks.txt'.format(os.environ['USERNAME']), 'r')]
 
     else:
         track_ids = r.search_song_ids(filepath=filename)
