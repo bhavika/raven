@@ -125,4 +125,3 @@ class Raven(object):
                 else:
                     items.add(artist)
         return items
-
