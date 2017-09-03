@@ -3,24 +3,21 @@ import json
 import logging
 import os
 from datetime import timedelta, datetime
-from time import sleep
-
 import spotipy
-from dotenv import load_dotenv, find_dotenv
 from spotipy import oauth2
 from spotipy import util
 from spotipy.client import SpotifyException
 from tqdm import tqdm
+from dotenv import load_dotenv, find_dotenv
 from raven.constants import scope
 
 load_dotenv(find_dotenv())
 
 logging.getLogger("requests").setLevel(logging.WARNING)
+logging.basicConfig(filename='Raven.log', filemode='a', level=logging.DEBUG)
 
 
 class Raven(object):
-
-    logging.basicConfig(filename='Raven.log', filemode='a', level=logging.DEBUG)
 
     def __init__(self):
         token = util.prompt_for_user_token(os.environ['USERNAME'], scope=scope,
@@ -63,11 +60,8 @@ class Raven(object):
         :param filepath: str
         :return list of artist IDs
         """
-
-        artists = create_collection(filepath, item_type='artists')
-
+        artists = self.create_collection(filepath, item_type='artists')
         print("{} artists found".format(len(artists)))
-
         artist_ids = set()
         ignored = set()
 
@@ -77,18 +71,15 @@ class Raven(object):
                     results = self.spotify.search(q='artist:' + artist, type='artist', limit=3)
                     aid = str(results['artists']['items'][0]['id'])
                     artist_ids.add(aid)
-                    r.refresh_token()
                     logging.info("Added artist ID for: {} ".format(artist))
                 except IndexError:
                     ignored.add(artist)
                     logging.debug("Ignored: {}".format(artist))
-                    r.refresh_token()
-                    sleep(0.4)
                 except ConnectionError:
                     continue
                 except SpotifyException as e:
-                    r.refresh_token()
                     logging.debug(e.__str__())
+                    self.refresh_token()
 
         return list(artist_ids)
 
@@ -98,48 +89,39 @@ class Raven(object):
         :param filepath: str
         :return: list of track IDs
         """
-        tracks = create_collection(filepath, item_type='tracks')
-
+        tracks = self.create_collection(filepath, item_type='tracks')
         print("{} tracks found".format(len(tracks)))
-
         track_ids = set()
         ignored = set()
 
-        for track in tqdm(tracks):
-            try:
-                results = self.spotify.search(q=track, type='track', limit=3)
-                tid = str(results['tracks']['items'][0]['id'])
-                track_ids.add(tid)
-                logging.info("Added track ID for: {} ".format(track))
-            except IndexError:
-                ignored.add(track)
-                logging.debug("Ignored: {}".format(track))
-            except ConnectionError:
-                continue
-            except SpotifyException as e:
-                r.refresh_token()
-                logging.debug(e.__str__())
-
         with open('.cache-{0}-tracks.txt'.format(os.environ['USERNAME']), 'w') as track_cache:
-            for track in track_ids:
-                track_cache.write(track + '\n')
-
+            for track in tqdm(tracks):
+                try:
+                    results = self.spotify.search(q=track, type='track', limit=3)
+                    tid = str(results['tracks']['items'][0]['id'])
+                    track_ids.add(tid)
+                    track_cache.write(tid + '\n')
+                    logging.info("Added track ID for: {} ".format(track))
+                except IndexError:
+                    ignored.add(track)
+                    logging.debug("Ignored: {}".format(track))
+                except ConnectionError:
+                    continue
+                except SpotifyException as e:
+                    self.refresh_token()
+                    logging.debug(e.__str__())
         return list(track_ids)
 
-
-def create_collection(filepath, item_type):
-    with open(filepath) as f:
-        reader = csv.DictReader(f, fieldnames=['Artist', 'Track'], delimiter=',')
-        next(reader)
-        items = set()
-        for row in tqdm(reader):
-            artist = row['Artist'].strip()
-            if item_type == 'tracks':
-                track = row['Track'].strip()
-                items.add(track + " " + artist)
-            else:
-                items.add(artist)
-    return items
-
-
-r = Raven()
+    def create_collection(self, filepath, item_type):
+        with open(filepath) as f:
+            reader = csv.DictReader(f, fieldnames=['Artist', 'Track'], delimiter=',')
+            next(reader)
+            items = set()
+            for row in tqdm(reader):
+                artist = row['Artist'].strip()
+                if item_type == 'tracks':
+                    track = row['Track'].strip()
+                    items.add(track + " " + artist)
+                else:
+                    items.add(artist)
+        return items
